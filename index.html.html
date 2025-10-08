@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anton's Clock ⏰</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 1s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        body.day-mode {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body.night-mode {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .instruction {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .instruction strong {
+            color: #856404;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        .clock-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            min-width: 350px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .clock-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .clock-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .date {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .time {
+            font-size: 4em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 900px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .status-indicator {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .status-message {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .status-message.available {
+            color: #28a745;
+        }
+
+        .status-message.sleeping {
+            color: #dc3545;
+        }
+
+        .countdown {
+            font-size: 1.3em;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 15px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.5em;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .sound-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .emoji-animation {
+            font-size: 5em;
+            margin: 20px 0;
+            display: inline-block;
+        }
+
+        .sleeping {
+            animation: sleep 3s ease-in-out infinite;
+        }
+
+        @keyframes sleep {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .awake {
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @media (max-width: 768px) {
+            .clock-card {
+                min-width: 280px;
+                padding: 30px 20px;
+            }
+            
+            .time {
+                font-size: 2.5em;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body class="day-mode">
+    <div class="header">
+        <h1>⏰ Anton's Special Clock ⏰</h1>
+        <p>Hi Aletta & Miriam! 👋 This shows you exactly when you can reach Anton.</p>
+        <div class="instruction">
+            <strong>💡 Pro Tip:</strong> Save this file as "<strong>Anton's Clock</strong>" in WhatsApp, so you can check Anton's time anytime you need! Just click on it and it will show you the current time and status.
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="clock-card">
+            <div class="clock-title">🇿🇦 Pretoria Time</div>
+            <div class="date" id="pretoriaDate">Loading...</div>
+            <div class="time" id="pretoriaTime">--:--:--</div>
+        </div>
+
+        <div class="clock-card">
+            <div class="clock-title">🌴 Anton's Time (Los Angeles)</div>
+            <div class="date" id="laDate">Loading...</div>
+            <div class="time" id="laTime">--:--:--</div>
+        </div>
+    </div>
+
+    <div class="status-card">
+        <div class="status-indicator" id="statusEmoji">⏳</div>
+        <div class="emoji-animation" id="animatedEmoji"></div>
+        <div class="status-message" id="statusMessage">Checking...</div>
+        <div class="countdown" id="countdown"></div>
+    </div>
+
+    <button class="sound-toggle" id="soundToggle" title="Toggle Sound">🔊</button>
+
+    <script>
+        let soundEnabled = true;
+        let audioContext;
+        let lastHour = -1;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTick() {
+            if (!soundEnabled || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        function playChime() {
+            if (!soundEnabled || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 523.25; // C note
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.textContent = soundEnabled ? '🔊' : '🔇';
+            if (soundEnabled) {
+                initAudio();
+                playTick();
+            }
+        });
+
+        function updateClocks() {
+            const now = new Date();
+            
+            // Pretoria time (SAST - UTC+2)
+            const pretoriaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Johannesburg' }));
+            
+            // LA time (PST/PDT)
+            const laTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+            
+            // Format times
+            const pretoriaTimeStr = pretoriaTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false 
+            });
+            
+            const laTimeStr = laTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false 
+            });
+            
+            // Format dates
+            const pretoriaDateStr = pretoriaTime.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            const laDateStr = laTime.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // Update display
+            document.getElementById('pretoriaTime').textContent = pretoriaTimeStr;
+            document.getElementById('laTime').textContent = laTimeStr;
+            document.getElementById('pretoriaDate').textContent = pretoriaDateStr;
+            document.getElementById('laDate').textContent = laDateStr;
+            
+            // Check availability (9pm - 5:15am LA time = sleeping)
+            const laHours = laTime.getHours();
+            const laMinutes = laTime.getMinutes();
+            
+            const isSleeping = (laHours >= 21) || (laHours < 5) || (laHours === 5 && laMinutes < 15);
+            
+            // Update status
+            const statusEmoji = document.getElementById('statusEmoji');
+            const animatedEmoji = document.getElementById('animatedEmoji');
+            const statusMessage = document.getElementById('statusMessage');
+            const countdown = document.getElementById('countdown');
+            const body = document.body;
+            
+            if (isSleeping) {
+                statusEmoji.textContent = '🌙';
+                animatedEmoji.textContent = '😴';
+                animatedEmoji.className = 'emoji-animation sleeping';
+                statusMessage.textContent = '💤 Anton is Sleeping - DO NOT DISTURB!';
+                statusMessage.className = 'status-message sleeping';
+                body.className = 'night-mode';
+                
+                // Calculate wake up time (5:15 AM LA time)
+                let wakeTime = new Date(laTime);
+                wakeTime.setHours(5, 15, 0, 0);
+                
+                if (laHours >= 21 || laHours < 5 || (laHours === 5 && laMinutes < 15)) {
+                    if (laHours >= 21) {
+                        wakeTime.setDate(wakeTime.getDate() + 1);
+                    }
+                }
+                
+                const diff = wakeTime - laTime;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                countdown.textContent = `⏰ Anton wakes up in ${hours} hours and ${minutes} minutes`;
+                
+            } else {
+                statusEmoji.textContent = '✅';
+                animatedEmoji.textContent = '🎉';
+                animatedEmoji.className = 'emoji-animation awake';
+                statusMessage.textContent = '✨ Anton is AWAKE - Feel Free to Contact!';
+                statusMessage.className = 'status-message available';
+                body.className = 'day-mode';
+                
+                // Calculate sleep time (9 PM LA time)
+                let sleepTime = new Date(laTime);
+                sleepTime.setHours(21, 0, 0, 0);
+                
+                if (laHours >= 21) {
+                    sleepTime.setDate(sleepTime.getDate() + 1);
+                }
+                
+                const diff = sleepTime - laTime;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                countdown.textContent = `🌙 Anton goes to sleep in ${hours} hours and ${minutes} minutes`;
+            }
+            
+            // Play chime on hour change when available
+            if (soundEnabled && laHours !== lastHour && !isSleeping) {
+                playChime();
+                lastHour = laHours;
+            }
+            
+            // Subtle tick sound every 30 seconds
+            if (soundEnabled && laTime.getSeconds() % 30 === 0) {
+                playTick();
+            }
+        }
+
+        // Initialize audio on first user interaction
+        document.addEventListener('click', function initOnClick() {
+            initAudio();
+            document.removeEventListener('click', initOnClick);
+        }, { once: true });
+
+        // Update immediately and then every second
+        updateClocks();
+        setInterval(updateClocks, 1000);
+    </script>
+</body>
+</html>
